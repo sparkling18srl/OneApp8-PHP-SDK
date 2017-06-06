@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="./test/bootstrap.php"
+    color="true"
+    stopOnFailure="false"
+    syntaxCheck="false"
+    convertErrorsToException="true"
+    converWarningsToException="true"
+    testSuiteLoaderFile="phpunit/src/Runner/StandardTestSuiteLoader.php">
+
+    <testsuites>
+        <testsuite name="All">
+            <directory>test</directory>
+        </testsuite>
+    </testsuites>
+
+    <logging>
+        <log type="junit" target="build/junit.xml" logIncompleteSkipped="false" />
+    </logging>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./lib</directory>
+            <exclude></exclude>
+        </whitelist>
+    </filter>
+</phpunit>
+

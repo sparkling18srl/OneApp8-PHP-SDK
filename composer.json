@@ -1,0 +1,22 @@
+{
+	"name": "sparkling18/rest-api-sdk-php",
+	"description": "Sparkling18's PHP SDK for REST APIs",
+	"keywords": ["sparkling18", "payments", "rest", "sdk"],
+	"type": "library",
+	"authors": [
+		{
+			"name": "Sparkling18",
+			"homepage": "https://sparkling18.com"
+		}
+	],
+	"require": {
+		"php": ">=7.0",
+		"phpseclib/phpseclib": "2.*"
+	},
+    "require-dev": {
+        "phpunit/phpunit": "^6.1"
+    },
+	"autoload": {
+		"psr-4": {"OneApp8\\": "src/"}
+	}
+}
