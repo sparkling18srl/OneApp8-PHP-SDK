@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="./test/bootstrap.php"
     color="true"
-    stopOnFailure="false"
+    stopOnFailure="true"
     syntaxCheck="false"
     convertErrorsToException="true"
     converWarningsToException="true"

@@ -27,9 +27,11 @@ class RegistersTest extends TestCase
     {
         $registers = $this->resource->readAll();
         $this->assertNotNull($registers);
-        $this->assertObjectHasAttribute('total', $registers);
-        $this->assertObjectHasAttribute('items', $registers);
-        $this->assertGreaterThanOrEqual(1, $registers->items, "No registers found");
+        $this->assertArrayHasKey('total', $registers);
+        $this->assertArrayHasKey('items', $registers);
+        $this->assertTrue(count($registers['total']) > 0);
+        $this->assertTrue(count($registers['items']) > 0);
+        $this->assertGreaterThanOrEqual(1, $registers['items'], "No registers found");
     }
 
     /**
@@ -40,8 +42,8 @@ class RegistersTest extends TestCase
         $expected = 243;
         $register = $this->resource->read($expected);
         $this->assertNotNull($register);
-        $this->assertObjectHasAttribute('id', $register);
-        $this->assertEquals($expected, $register->id);
+        $this->assertArrayHasKey('id', $register);
+        $this->assertEquals($expected, $register['id']);
     }
 
     /**
@@ -54,14 +56,24 @@ class RegistersTest extends TestCase
         $register = $this->resource->read($expected);
         $this->assertNotNull($register);
         $this->assertObjectHasAttribute('id', $register);
-        $this->assertEquals($expected, $register->id);
+        $this->assertEquals($expected, $register['id']);
     }
 
     /**
      * @group registers
+     * @expectedException BadMethodCallException
      */
     public function testDelete()
     {
         $this->resource->delete('1243');
+    }
+
+    /**
+     * @group registers
+     * @expectedException BadMethodCallException
+     */
+    public function testCreate()
+    {
+        return $this->resource->create([]);
     }
 }

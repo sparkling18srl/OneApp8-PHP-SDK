@@ -3,6 +3,7 @@
 namespace OneApp8;
 
 use PHPUnit\Framework\TestCase;
+use Faker\Factory as Faker;
 
 /**
  * Class UsersTest
@@ -18,8 +19,11 @@ class UsersTest extends TestCase
     /**
      * @beforeClass
      */
-    public static function initClass()
+    public static function setUpClass()
     {
+        $faker = Faker::create('it_IT');
+        $firstName = $faker->firstNameMale();
+        $lastName = $faker->lastName();
         self::$user = [
             'externalId' => self::EXTERNAL_ID,
             'merchant' => [
@@ -28,24 +32,24 @@ class UsersTest extends TestCase
             'info' => [
                 'birthCity' => 'Palermo',
                 'country' => 'IT',
-                'name' => 'Charlie',
-                'surname' => 'Brown',
-                'birthDate' => strtotime('1/5/1979'),
+                'name' => $firstName,
+                'surname' => $lastName,
+                'birthDate' => strtotime('1/6/1978'),
                 'city' => 'Palermo',
-                'ssn' => 'LBRGPP79E01F126K',
+                'ssn' => 'ABCXWZ78E01F126K',
                 'birthCountry' => 'IT',
             ],
             'email' => [
-                'address' => 'charlie.brownie@sparkling18.com',
+                'address' => $firstName.'.'.$lastName.'@'.$faker->domainName(),
                 'valid' => true
             ],
             'cellphone' => [
-                'number' => '3337170846',
+                'number' => substr($faker->e164PhoneNumber(), 4),
                 'country' => 'IT',
                 'valid' => true
             ],
-            'userid' => 'charlie.brownie',
-            'password' => 'p@ssword',
+            'userid' => strtolower($firstName.'.'.$lastName),
+            'password' => strtolower($firstName.'.'.$lastName)
         ];
     }
 
@@ -97,5 +101,17 @@ class UsersTest extends TestCase
         $user = $this->resource->read(self::$createdUserId);
         $this->assertNotNull($user);
         $this->resource->delete($user['id']);
+    }
+
+    /**
+     * Returns a new user array
+     *
+     * @return array The user array
+     */
+    public static function getUser()
+    {
+        self::setUpClass();
+
+        return self::$user;
     }
 }

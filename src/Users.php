@@ -76,7 +76,11 @@ class Users implements RestService
      */
     public function create($user)
     {
-        return $this->apiCaller->request('POST', self::ENDPOINT, $user);
+        if (!empty($user) && is_array($user)) {
+            return $this->apiCaller->request('POST', self::ENDPOINT, $user);
+        }
+
+        throw new \BadMethodCallException('The user value is wrong or empty');
     }
 
     /**
@@ -84,6 +88,11 @@ class Users implements RestService
      */
     public function update($user)
     {
-        return $this->apiCaller->request('PUT', self::ENDPOINT, $user);
+        if (!empty($user) && is_array($user)) {
+            /* return $this->apiCaller->request('PUT', self::ENDPOINT, $user); */
+            return $this->apiCaller->request('POST', self::ENDPOINT, $user);
+        }
+
+        throw new \BadMethodCallException('The user value is wrong or empty');
     }
 }

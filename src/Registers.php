@@ -39,7 +39,7 @@ class Registers implements RestService
         throw new \BadMethodCallException("Method not implemented");
     }
 
-    public function create($object)
+    public function create($data)
     {
         throw new \BadMethodCallException("Method not implemented");
     }

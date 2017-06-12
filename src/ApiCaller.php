@@ -43,6 +43,7 @@ class ApiCaller
         $headers = $this->generateHeaders($signDate, $signingStringEncrypted, $symmetricKeyEncrypted);
 
         $result = $this->execRequest($method, $url, $headers, $bodyAsJsonEncrypted);
+        print_r($result);
         if (strtoupper($method) == 'DELETE') {
             return;
         }
@@ -110,7 +111,7 @@ class ApiCaller
 
             $tmpHeaders[] = 'Content-Type: application/json';
 
-            $url = Config::get('main.1app8_rest_base_url') . '/' . $url;
+            $url = preg_match('/creditcards$/', $url) ? Config::get('main.1app8_rest_pci_base_url')."/$url" : Config::get('main.1app8_rest_base_url')."/$url";
         }
 
         return $client->request($method, $url, $headers, null, $data);
@@ -175,7 +176,11 @@ class ApiCaller
 
     protected function generateSigningString($method, $url, $signDate, $bodyEncrypted, $symmetricKeyEncrypted)
     {
-        $string = '(request-line): ' . strtolower($method) . ' /v1/server/' . strtolower($url) . "\n";
+        $path = '/v1/server/';
+        if (preg_match('/creditcards$/', $url)) {
+            $path = '/v1/server-pci/';
+        }
+        $string = '(request-line): ' . strtolower($method) . ' ' . $path . strtolower($url) . "\n";
         $string .= 'host: ' . $this->host . "\n";
         $string .= 'sign-date: ' . $signDate . "\n";
         $string .= 'content-length: ' . strlen($bodyEncrypted) . "\n";
