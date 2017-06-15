@@ -41,10 +41,24 @@ class CreditCardTest extends TestCase
      */
     public function testCreate()
     {
-
+        $this->markTestSkipped();
         $result = $this->resource->create($card);
         $this->assertNotNull($result);
+    }
+
+    /**
+     * @group creditcards
+     */
+    public function testDelete()
+    {
+        // set correct merchantId and walletId
+        $data = [
+            'merchantId' => 1140,
+            'walletId' => 17163914
+        ];
+        $result = $this->resource->delete($data);
         print_r($result);
+        $this->assertNotNull($result);
     }
 
     /**

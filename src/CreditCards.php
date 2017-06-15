@@ -26,10 +26,23 @@ class CreditCards implements RestService
         throw new \BadMethodCallException();
     }
 
-    public function delete($id)
+    /**
+     * To delete a credit card
+     * @param array The array with keys marchantId and walletId
+     */
+    public function delete($param)
     {
-        throw new \BadMethodCallException();
-    }
+        if (!is_array($param)
+            && !array_key_exists('merchantId', $param)
+            && !array_key_exists('walletId', $param)) {
+            throw new \BadMethodCallException('The proveded input param is not correct');
+        }
+        $path = self::ENDPOINT
+            .'/wallet?merchantId='.$param['merchantId']
+            .'/walletId='.$param['walletId'];
+
+        return $this->apiCaller->request('DELETE', $path, []);
+   }
 
     public function create($data)
     {
