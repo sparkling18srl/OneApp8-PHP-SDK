@@ -28,8 +28,8 @@ class ApiCaller
     public function request($method, $url, $data)
     {
         $signDate = date('r');
-        $symmetricKey = $this->generatesymmetricKey($method);
-        $symmetricKeyEncrypted = $this->generatesymmetricKeyEncrypted($symmetricKey);
+        $symmetricKey = $this->generateSymmetricKey();
+        $symmetricKeyEncrypted = $this->generateSymmetricKeyEncrypted($symmetricKey);
 
         $bodyAsJson = null;
         $bodyAsJsonEncrypted = null;
@@ -52,9 +52,6 @@ class ApiCaller
         $responseSymmetricKey = $this->decryptResponseSymmetricKey($responseHeaders);
         $responseBodyDecrypted = $this->decryptResponseBody($result['body'], $responseSymmetricKey);
 
-        if (!$this->verifyResponseSigninString($responseHeaders, $responseSigninString)) {
-            return false;
-        }
 
         return json_decode($responseBodyDecrypted, true);
     }
@@ -111,7 +108,9 @@ class ApiCaller
 
             $tmpHeaders[] = 'Content-Type: application/json';
 
-            $url = preg_match('/creditcards$/', $url) ? Config::get('main.1app8_rest_pci_base_url')."/$url" : Config::get('main.1app8_rest_base_url')."/$url";
+            $url = preg_match('/creditcards$/', $url) ?
+                Config::get('main.1app8_rest_pci_base_url')."/$url" :
+                Config::get('main.1app8_rest_base_url')."/$url";
         }
 
         return $client->request($method, $url, $headers, null, $data);
@@ -158,10 +157,12 @@ class ApiCaller
     protected function generateHeaders($signDate, $signingStringEncrypted, $symmetricKeyEncrypted)
     {
         return [
-                'Authorization' => 'Signature keyId="' . Config::get('main.1app8_rest_key_id') . '",algorithm="rsa-sha256",headers="(request-line) host sign-date content-length key", signature="' . $signingStringEncrypted .'"',
-                'sign-date' => $signDate,
-                'key' => $symmetricKeyEncrypted
-            ];
+            'Authorization' => 'Signature keyId="' . Config::get('main.1app8_rest_key_id') .
+            '",algorithm="rsa-sha256",headers="(request-line) host sign-date content-length key", signature="' .
+            $signingStringEncrypted .'"',
+            'sign-date' => $signDate,
+            'key' => $symmetricKeyEncrypted
+        ];
     }
 
     protected function encryptSigningString($signingString)
@@ -198,7 +199,7 @@ class ApiCaller
         return base64_encode($aes->encrypt($body));
     }
 
-    protected function generateSymmetricKey($method)
+    protected function generateSymmetricKey()
     {
         $method = 'AES-128-CBC';
         $ivlen = openssl_cipher_iv_length($method);
