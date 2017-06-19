@@ -19,62 +19,8 @@ Nel codice sorgente si fa riferimento a alle chiavi che vengono configurate nel 
 
 E' corredata da classi di test unitario in (PHPUnit) che fungono da esempio per l'utilizzo della libreria. Questi vanno eseguit dopo aver configurato correttamente il file **Config.php**.
 
-
-## Sicurezza
-L'API Restful &egrave; invocata applicando, in momenti diversi, meccanismi di crittografia simmetrica e asimmettica abbinato alla firma del messaggio.
-
-## Protocollo
-L'API Restful implemente un meccanismo di sicurezza basato su firma dei messaggi scambiati e crittografia del corpo del messaggio. In particolare:
-- Crittografia del corpo del messaggio con chiave simmetrica condivisa generata in modo casuale; valida per la durata della comunicazione corrente;
- - Firma del messaggio in *sha-256* degli http header con crittografia RSA PKCS#1 e chiave privata.
-
-I passi da compiere per ogni invocazione dell'API si possono riassumere come di seguito:
-- Generazione di una chave simmetrica casuale **symmetricKey**, AES 128 CBC. Questa &egrave; impiegata per la cifratura del corpo del messaggio della richiesta;
-- Cifratura della chiave simmetrica generata in precedenza applicando la chiave pubblica del server secondo l'algoritmo di cifratura **RSA/ECB/PKCS1** come segue:
-	- ```Base64.encode(encrypt(<public_server_key>, simmetricKey))```
-- Cifratura del corpo della richieta http secondo l'algoritmo ** AES/CTR/NoPadding** come di seguito:
-	- ```Base64.encode(encrypt(simmetricKey, <http_request_body>))```
-- Firma dello header http:
-	- Per generare la firma del messaggio il client deve utilizzare ciascuno dei campi key presenti nello hader http e valorizzare il campo ** Authorization ** dello stesso header http.
-
-Esempio di firma:
-```http
-(request-line): post /v1/server/users
-host: api.sparkling18.com
-sign-date: Tue, 26 May 2017 16:36:56 GMT
-content-lenght: 344
-key: D8Dr8Xj/m3v2DhxiRD8Dr8XpugN5wpy8iBVJtpkHUIp4qBYpzx2QvD16t8X0BUMiKc53Age+baQFWwb2iYYJzvuUL+krrl/Q7H6fPBADBsHqEZ7IE8rR0 Ys3lb7J5A6VB9J/4yVTRiBcxTypW/2iYY
-```
-
-La firma del messaggio viene costruita concatenando a lettere minuscole (lowercase) il il nome del campo dello Http Header seguito dal carattere ':' (due punti), dal valore del campo stesso e dal carattere newline '"\n'"; tranne per l'ultimo valore concatenato.
-
-Infine il campo ** Authorization ** dello Http header ha la setuente forma:
-
-```http
-Authorization: Signature keyId="RSAKeyId",algorithm="rsa-sha256",headers="(request-line) host sign-date content-length key", signature="Base64(RSA-SHA256(<firma_del_messaggio>))
-```
-
-** RSAKeyId: ** l'id della chiave fornito dalla dashboard di Sparkling18.
-
-
-I passi da compiere per ogni risposta ricevuta si possono riassumere come di setuito:
-- Verifica della firma dello header http della risposta;
-- Decifratura della chiave simmetrica;
-- Decifratura del corpo della risposta.
-
-![Passi per la cifratura e decifratura dei messaggi](http://www.sparkling18.com/static/images/api-doc/draft_encryption_and_signature.jpg)
-
-Dato che la comunicazione client/server ha luogo tramite crittografia asimmetrica, il client e il server debbono procedere
-allo scambio delle loro chiavi pubbliche.
-Lo scambio delle stesse avviene tramite il Backoffice di Sparkling18. Quando la procedura per lo scambio delle chiavi
-sar&agrave; conclusa il client sar&agrave; in possesso dei seguenti dati;
-- ID del merchant assegnato dal Backoffice, *keyId*;
-- Le seguenti chiavi:
-- Chiave privata del client;
-- Chiave pubblica del client;
-- Chiave pubblica del server Sparkling18.
-
 ## Procedura scambio chiavi
+
 Qui di seguto viene spiegata la procedura per la generazione e lo scambio chievi tra il merchant e Sparkling18.
 ** Requisito **
 La generazione delle chieve richiede l'utilizzo di * OpenSSL. *
@@ -145,9 +91,64 @@ Ottenute tali autorizzazioni si pu&ograve; procedere come segue:
 6. Conservare l'*"Identificativo chiavi"* (**keyId**). E' una stringa numerica utilizzata per configurare il restful client;
 7. Cliccare ul pulsante *"Scarica chiave pubblica"*. Questa &egrave; la chiave pubblica del server Sparkling18 contattato dalle chiamate restful.
 
-# In Breve
+### In Breve
 
 Per la configurazione del client restful lato merchant, serviranno:
 1. La **keyId** del merchant ottenuta al punto 7 del paragrafo [Scambio chiavi](Scambio chiavi)
 2. Chiave privata del merchant
 3. Chiave pubblica del server Sparkling18
+
+# Sicurezza
+L'API Restful &egrave; invocata applicando, in momenti diversi, meccanismi di crittografia simmetrica e asimmettica abbinato alla firma del messaggio.
+
+## Protocollo
+L'API Restful implemente un meccanismo di sicurezza basato su firma dei messaggi scambiati e crittografia del corpo del messaggio. In particolare:
+- Crittografia del corpo del messaggio con chiave simmetrica condivisa generata in modo casuale; valida per la durata della comunicazione corrente;
+ - Firma del messaggio in *sha-256* degli http header con crittografia RSA PKCS#1 e chiave privata.
+
+I passi da compiere per ogni invocazione dell'API si possono riassumere come di seguito:
+- Generazione di una chave simmetrica casuale **symmetricKey**, AES 128 CBC. Questa &egrave; impiegata per la cifratura del corpo del messaggio della richiesta;
+- Cifratura della chiave simmetrica generata in precedenza applicando la chiave pubblica del server secondo l'algoritmo di cifratura **RSA/ECB/PKCS1** come segue:
+	- ```Base64.encode(encrypt(<public_server_key>, simmetricKey))```
+- Cifratura del corpo della richieta http secondo l'algoritmo ** AES/CTR/NoPadding** come di seguito:
+	- ```Base64.encode(encrypt(simmetricKey, <http_request_body>))```
+- Firma dello header http:
+	- Per generare la firma del messaggio il client deve utilizzare ciascuno dei campi key presenti nello hader http e valorizzare il campo ** Authorization ** dello stesso header http.
+
+Esempio di firma:
+```http
+(request-line): post /v1/server/users
+host: api.sparkling18.com
+sign-date: Tue, 26 May 2017 16:36:56 GMT
+content-lenght: 344
+key: D8Dr8Xj/m3v2DhxiRD8Dr8XpugN5wpy8iBVJtpkHUIp4qBYpzx2QvD16t8X0BUMiKc53Age+baQFWwb2iYYJzvuUL+krrl/Q7H6fPBADBsHqEZ7IE8rR0 Ys3lb7J5A6VB9J/4yVTRiBcxTypW/2iYY
+```
+
+La firma del messaggio viene costruita concatenando a lettere minuscole (lowercase) il il nome del campo dello Http Header seguito dal carattere ':' (due punti), dal valore del campo stesso e dal carattere newline '"\n'"; tranne per l'ultimo valore concatenato.
+
+Infine il campo ** Authorization ** dello Http header ha la setuente forma:
+
+```http
+Authorization: Signature keyId="RSAKeyId",algorithm="rsa-sha256",headers="(request-line) host sign-date content-length key", signature="Base64(RSA-SHA256(<firma_del_messaggio>))
+```
+
+** RSAKeyId: ** l'id della chiave fornito dalla dashboard di Sparkling18.
+
+
+I passi da compiere per ogni risposta ricevuta si possono riassumere come di setuito:
+- Verifica della firma dello header http della risposta;
+- Decifratura della chiave simmetrica;
+- Decifratura del corpo della risposta.
+
+![Passi per la cifratura e decifratura dei messaggi](http://www.sparkling18.com/static/images/api-doc/draft_encryption_and_signature.jpg)
+
+Dato che la comunicazione client/server ha luogo tramite crittografia asimmetrica, il client e il server debbono procedere
+allo scambio delle loro chiavi pubbliche.
+Lo scambio delle stesse avviene tramite il Backoffice di Sparkling18. Quando la procedura per lo scambio delle chiavi
+sar&agrave; conclusa il client sar&agrave; in possesso dei seguenti dati;
+- ID del merchant assegnato dal Backoffice, *keyId*;
+- Le seguenti chiavi:
+- Chiave privata del client;
+- Chiave pubblica del client;
+- Chiave pubblica del server Sparkling18.
+
